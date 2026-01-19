@@ -50,6 +50,7 @@ export class TasksService {
     return found;
   }
 
+  // // Create to Information (CRUD)
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const { title, description } = createTaskDto;
 
@@ -61,6 +62,7 @@ export class TasksService {
 
     return this.tasksRepository.save(task);
   }
+
   // // Read to Information (CRUD)
   // getAllTasks(): Task[] {
   //   return this.tasks;
@@ -74,19 +76,7 @@ export class TasksService {
   //   }
   //   return found;
   // }
-  // // Create to Information (CRUD)
-  // createTask(createTaskDto: CreateTaskDto): Task {
-  //   const { title, description } = createTaskDto;
 
-  //   const task: Task = {
-  //     id: uuid(),
-  //     title,
-  //     description,
-  //     status: TaskStatus.OPEN,
-  //   };
-  //   this.tasks.push(task);
-  //   return task;
-  // }
   // // Delete to Information by filter Id (CRUD)
   // deleteTask(id: string): void {
   //   const found = this.getTaskById(id);

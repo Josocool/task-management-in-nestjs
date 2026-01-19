@@ -18,7 +18,7 @@ export class TasksRepository extends Repository<Task> {
       description,
       status: TaskStatus.OPEN, // Defined default
     });
-
-    return this.save(task);
+    await this.save(task);
+    return task;
   }
 }
