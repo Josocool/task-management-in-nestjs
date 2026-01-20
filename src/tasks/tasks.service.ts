@@ -3,7 +3,7 @@ import { TaskStatus } from './task-status.enum';
 import { Repository } from 'typeorm';
 
 import { CreateTaskDto } from './dto/create-task.dto';
-//import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
@@ -13,33 +13,19 @@ export class TasksService {
     @InjectRepository(Task)
     private readonly tasksRepository: Repository<Task>,
   ) {}
-  // // function GetTasksFilterDto
-  // getTasksWithFilter(fitlerDto: GetTasksFilterDto): Task[] {
-  //   const { status, search } = fitlerDto;
-  //   // defined a  temporary array to hold the result
-  //   let tasks = this.getAllTasks();
 
-  //   // do something with status
-  //   if (status) {
-  //     // ..
-  //     tasks = tasks.filter((task) => task.status === status);
-  //   }
-  //   // do something with search
-  //   if (search) {
-  //     // ..
-  //     tasks = tasks.filter((task) => {
-  //       if (task.title.includes(search) || task.description.includes(search)) {
-  //         return true;
-  //       }
+  // function GetTasksFilterDto
+  getTasks(fitlerDto: GetTasksFilterDto): Promise<Task[]> {
+    return this.tasksRepository.getTasks(fitlerDto);
+  }
 
-  //       return false;
-  //     });
-  //   }
+  // // Read to Information (CRUD)
+  async getTaskAll(): Promise<Task[]> {
+    // TypeORM will return array task
+    return await this.tasksRepository.find();
+  }
 
-  //   // return final result
-  //   return tasks;
-  // }
-
+  //Read to Information by filter Id (CRUD)
   async getTaskById(id: string): Promise<Task> {
     const found = await this.tasksRepository.findOneBy({ id });
 
@@ -63,6 +49,14 @@ export class TasksService {
     return this.tasksRepository.save(task);
   }
 
+  // // Delete to Information by filter Id (CRUD)
+  async deleteTask(id: string): Promise<void> {
+    const result = await this.tasksRepository.delete({ id });
+    console.log(result);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
+  }
   // // Read to Information (CRUD)
   // getAllTasks(): Task[] {
   //   return this.tasks;
@@ -84,9 +78,11 @@ export class TasksService {
   // }
 
   // // Update to Information by filter Id (CRUD)
-  // updateTaskStatus(id: string, status: TaskStatus): Task {
-  //   const task = this.getTaskById(id);
-  //   task.status = status;
-  //   return task;
-  // }
+  async updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
+    const task = await this.getTaskById(id);
+    task.status = status;
+    await this.tasksRepository.save(task);
+    console.log(task);
+    return task;
+  }
 }
