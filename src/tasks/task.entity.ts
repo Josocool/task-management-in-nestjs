@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { TaskStatus } from './task-status.enum';
 
-@Entity('task')
+@Entity('task') // ບ່ອນກຳນົດສົ່ງຂໍ້ມູນໄປ table ໃດ
 export class Task {
   @PrimaryGeneratedColumn('uuid')
   id: string;
