@@ -6,24 +6,37 @@ import {
 } from '@nestjs/common';
 import { TaskStatus } from './task-status.enum';
 import { Repository } from 'typeorm';
-
 import { CreateTaskDto } from './dto/create-task.dto';
-//import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
-
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
+
   constructor(
     @InjectRepository(Task)
     private readonly tasksRepository: Repository<Task>,
   ) {}
 
-  //Read all task
-  async getTaskAll(): Promise<Task[]> {
-    // TypeORM will return array task
-    return this.tasksRepository.find();
+  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+    const { status, search } = filterDto;
+
+    const query = this.tasksRepository.createQueryBuilder('task');
+
+    if (status) {
+      query.andWhere('task.status = :status', { status });
+    }
+
+    if (search) {
+      query.andWhere(
+        'LOWER(task.title) LIKE LOWER(:search) OR LOWER (task.description) LIKE LOWER( :search)',
+        { search: `%${search}%` },
+      );
+    }
+    //console.log(filterDto);
+    return await query.getMany();
   }
 
   //Read to Information by filter Id (CRUD)
@@ -61,21 +74,12 @@ export class TasksService {
 
   // Delete to Information by filter Id (CRUD)
   async deleteTask(id: string): Promise<void> {
-    try {
-      const result = await this.tasksRepository.delete({ id });
-      this.logger.log(`Deleted task with ID "${id}"`);
-      if (result.affected === 0) {
-        throw new NotFoundException(`Task with ID "${id}" not found`);
-      }
-      this.logger.log(`Delete Task with ID "${id}"`);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        this.logger.error('Failed to delete task', error.stack);
-      } else {
-        this.logger.error('Failed to delete task: unknown error');
-      }
-      throw new InternalServerErrorException();
+    const result = await this.tasksRepository.delete({ id });
+    this.logger.log(`Deleted task with ID "${id}"`);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
     }
+    this.logger.log(`Delete Task with ID "${id}"`);
   }
 
   // Update to Information by filter Id (CRUD)

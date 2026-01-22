@@ -10,25 +10,31 @@ import {
   ValidationPipe,
   ParseUUIDPipe,
   Logger,
+  Patch,
+  Query,
 } from '@nestjs/common';
-import { Patch /*Query*/ } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 //import type { TaskStatus } from './task-status.enum';
 import { CreateTaskDto } from './dto/create-task.dto';
 //import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { Task } from './task.entity';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 
 @Controller('tasks')
 export class TasksController {
   private readonly logger = new Logger(TasksController.name);
   constructor(private tasksService: TasksService) {}
 
-  // // ເຂົ້າເຖິງຂໍ້ມູນທັງໝົດ  Restful API (CRUD)
-  @Get() // ລືມບັນທັດນີ້ຕອນແລກຂໍ້ມູນເລີຍບໍ່ອອກ
-  getTaskAll(): Promise<Task[]> {
-    return this.tasksService.getTaskAll();
+  // ເຂົ້າເຖິງຂໍ້ມູນທັງໝົດ  Restful API (CRUD)
+  @Get()
+  getTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
+    return this.tasksService.getTasks(filterDto);
   }
+  // @Get() // ລືມບັນທັດນີ້ຕອນແລກຂໍ້ມູນເລີຍບໍ່ອອກ
+  // getTaskAll(): Promise<Task[]> {
+  //   return this.tasksService.getTaskAll();
+  // }
 
   // ເຂົ້າເຖິງຂໍ້ມູນຕາມ id, Read data by filter id  Restful API (CRUD)
   @Get('/:id')
