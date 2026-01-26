@@ -12,6 +12,7 @@ import {
   Logger,
   Patch,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 //import type { TaskStatus } from './task-status.enum';
@@ -20,8 +21,12 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { Task } from './task.entity';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '../auth/user.entity';
+import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('tasks')
+@UseGuards(AuthGuard())
 export class TasksController {
   private readonly logger = new Logger(TasksController.name);
   constructor(private tasksService: TasksService) {}
@@ -47,8 +52,9 @@ export class TasksController {
   createTask(
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     createTaskDto: CreateTaskDto,
+    @GetUser() user: User,
   ): Promise<Task> {
-    return this.tasksService.createTask(createTaskDto);
+    return this.tasksService.createTask(createTaskDto, user);
   }
 
   // recalling delete async function
@@ -58,7 +64,7 @@ export class TasksController {
     return this.tasksService.deleteTask(id);
   }
 
-  // // ອັບເດດສະຖານະຂອງຂໍ້ມູນຕາມເລກໄອດີ (Patch), Restful API (CRUD) [ Patch ໃຊ້ແກ້ຂໍ້ມູນບາງສ່ວນ, Put ໃຊ້ແກ້ຂໍ້ມູນຊຸດ ]
+  // ອັບເດດສະຖານະຂອງຂໍ້ມູນຕາມເລກໄອດີ (Patch), Restful API (CRUD) [ Patch ໃຊ້ແກ້ຂໍ້ມູນບາງສ່ວນ, Put ໃຊ້ແກ້ຂໍ້ມູນຊຸດ ]
   @Patch('/:id/status')
   updateTaskStatus(
     @Param('id', new ParseUUIDPipe()) id: string,

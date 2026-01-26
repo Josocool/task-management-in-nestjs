@@ -1,40 +1,44 @@
-import { DataSource, Repository, QueryFailedError } from 'typeorm';
+// users.repository.ts
 
-import { Injectable, ConflictException } from '@nestjs/common';
+import { DataSource, Repository /*QueryFailedError*/ } from 'typeorm';
+import { Injectable /*ConflictException*/ } from '@nestjs/common';
 import { User } from './user.entity';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { isPostgresError } from '../common/errors/postgres-error.util';
-import * as bcrypt from 'bcrypt';
+//import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+//import { isPostgresError } from '../common/errors/postgres-error.util';
+//import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(User, dataSource.createEntityManager());
   }
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
-
-    // hash password
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    console.log(salt);
-    console.log('hashedPassword', hashedPassword);
-
-    const user = this.create({ username, password: hashedPassword });
-
-    try {
-      await this.save(user);
-    } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        isPostgresError(error) &&
-        error.code === '23505'
-      ) {
-        throw new ConflictException('User already exists');
-      }
-
-      throw error;
-    }
+  async findByUsername(username: string): Promise<User | null> {
+    return this.findOne({ where: { username } });
   }
+  // async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  //   const { username, password } = authCredentialsDto;
+
+  //   // hash password
+  //   const salt = await bcrypt.genSalt();
+  //   const hashedPassword = await bcrypt.hash(password, salt);
+
+  //   console.log(salt);
+  //   console.log('hashedPassword', hashedPassword);
+
+  //   const user = this.create({ username, password: hashedPassword });
+
+  //   try {
+  //     await this.save(user);
+  //   } catch (error) {
+  //     if (
+  //       error instanceof QueryFailedError &&
+  //       isPostgresError(error) &&
+  //       error.code === '23505'
+  //     ) {
+  //       throw new ConflictException('User already exists');
+  //     }
+
+  //     throw error;
+  //   }
+  // }
 }

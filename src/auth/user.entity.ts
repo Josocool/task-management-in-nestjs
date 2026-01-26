@@ -1,4 +1,11 @@
-import { PrimaryGeneratedColumn, Entity, Column, Unique } from 'typeorm';
+import {
+  PrimaryGeneratedColumn,
+  Entity,
+  Column,
+  Unique,
+  OneToMany,
+} from 'typeorm';
+import { Task } from '../tasks/task.entity';
 
 @Entity()
 @Unique(['username']) // ກຳນົດໃຫ້ ຂໍ້ມູນ username ທີ່ signup ມາຕ້ອງຫ້າມມີຄ່າຊ້ຳກັນ
@@ -11,4 +18,7 @@ export class User {
   username: string;
   @Column()
   password: string;
+
+  @OneToMany((_type) => Task, (task) => task.user, { eager: true })
+  tasks: Task[];
 }
