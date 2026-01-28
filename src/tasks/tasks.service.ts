@@ -33,12 +33,32 @@ export class TasksService {
 
     if (search) {
       query.andWhere(
-        '(LOWER(task.title) LIKE LOWER(:search) OR LOWER (task.description) LIKE LOWER( :search))', // bug fix getting all task
+        '(LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search))',
         { search: `%${search}%` },
       );
     }
-    //console.log(filterDto);
-    return await query.getMany();
+
+    try {
+      const tasks = await query.getMany();
+      return tasks;
+    } catch (error: unknown) {
+      // checking error to Error object realize before calling to .stack
+      if (error instanceof Error) {
+        this.logger.error(
+          `Failed to get tasks for user "${user.username}". Filters: ${JSON.stringify(filterDto)}`,
+          error.stack,
+        );
+        console.error('Error retrieving tasks', error);
+      } else {
+        // case error not Error object
+        this.logger.error(
+          `Failed to get tasks for user "${user.username}". Filters: ${JSON.stringify(filterDto)}`,
+          'Unknown error',
+        );
+        console.error('Error retrieving tasks', error);
+      }
+      throw new InternalServerErrorException();
+    }
   }
 
   //Read to Information by filter Id (CRUD)

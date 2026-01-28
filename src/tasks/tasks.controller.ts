@@ -28,7 +28,9 @@ import { GetUser } from 'src/auth/get-user.decorator';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
+  //private logger = new Logger();
   private readonly logger = new Logger(TasksController.name);
+
   constructor(private tasksService: TasksService) {}
 
   // ເຂົ້າເຖິງຂໍ້ມູນທັງໝົດ  Restful API (CRUD)
@@ -37,6 +39,9 @@ export class TasksController {
     @Query() filterDto: GetTasksFilterDto,
     @GetUser() user: User,
   ): Promise<Task[]> {
+    this.logger.verbose(
+      `User "${user.username}" retrieving all tasks. Filtering: ${JSON.stringify(filterDto)}`,
+    );
     return this.tasksService.getTasks(filterDto, user);
   }
   // @Get() // ລືມບັນທັດນີ້ຕອນແລກຂໍ້ມູນເລີຍບໍ່ອອກ
@@ -60,13 +65,19 @@ export class TasksController {
     createTaskDto: CreateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
+    this.logger.verbose(
+      `User "${user.username}" creating a new task, Data: ${JSON.stringify(createTaskDto)}`,
+    );
     return this.tasksService.createTask(createTaskDto, user);
   }
 
   // recalling delete async function
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTask(@Param('id', new ParseUUIDPipe()) id: string, @GetUser() user: User): Promise<void> {
+  deleteTask(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<void> {
     return this.tasksService.deleteTask(id, user);
   }
 
