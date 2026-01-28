@@ -46,8 +46,11 @@ export class TasksController {
 
   // ເຂົ້າເຖິງຂໍ້ມູນຕາມ id, Read data by filter id  Restful API (CRUD)
   @Get('/:id')
-  getTaskById(@Param('id', new ParseUUIDPipe()) id: string): Promise<Task> {
-    return this.tasksService.getTaskById(id);
+  getTaskById(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    return this.tasksService.getTaskById(id, user);
   }
 
   // ສ້າງຂໍ້ມູນໃໝ່, Create  Restful API (CRUD)
@@ -63,8 +66,8 @@ export class TasksController {
   // recalling delete async function
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTask(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.tasksService.deleteTask(id);
+  deleteTask(@Param('id', new ParseUUIDPipe()) id: string, @GetUser() user: User): Promise<void> {
+    return this.tasksService.deleteTask(id, user);
   }
 
   // ອັບເດດສະຖານະຂອງຂໍ້ມູນຕາມເລກໄອດີ (Patch), Restful API (CRUD) [ Patch ໃຊ້ແກ້ຂໍ້ມູນບາງສ່ວນ, Put ໃຊ້ແກ້ຂໍ້ມູນຊຸດ ]
@@ -72,10 +75,12 @@ export class TasksController {
   updateTaskStatus(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    @GetUser()
+    user: User,
     updateTaskStatusDto: UpdateTaskStatusDto,
   ): Promise<Task> {
     const { status } = updateTaskStatusDto;
     this.logger.log(`Updating task ID ${id} with status ${status}`);
-    return this.tasksService.updateTaskStatus(id, status);
+    return this.tasksService.updateTaskStatus(id, status, user);
   }
 }
