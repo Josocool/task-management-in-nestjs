@@ -10,14 +10,21 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersRepository } from './users.repository';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: 'topSecret51',
-      signOptions: {
-        expiresIn: 3600,
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: 3600, // ລະບຸເວລາວັນໝົດອາຍຸໃນການຈັດການ
+          algorithm: 'HS256', // ລະບຸອໍກໍລິທີມ JWT ເປັນ HS256 ເພື່ອກວດສອບຄວາມຖືກຕ້ອງ ຂອງ auth
+        },
+      }),
     }),
     TypeOrmModule.forFeature([User]),
     CommonModule,

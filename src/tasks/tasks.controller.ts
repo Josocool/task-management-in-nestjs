@@ -85,9 +85,9 @@ export class TasksController {
   @Patch('/:id/status')
   updateTaskStatus(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     @GetUser()
     user: User,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     updateTaskStatusDto: UpdateTaskStatusDto,
   ): Promise<Task> {
     const { status } = updateTaskStatusDto;

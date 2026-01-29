@@ -9,6 +9,7 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.useGlobalPipes(new ValidationPipe()); // ສ່ວນຂອງການໃຊ້ Validator ມາກວດສອບຄວາມຖືກຕ້ອງຂອງຂໍ້ມູນ
   app.useGlobalInterceptors(new TransformInterceptor()); // feature convert Serialize user data
   const port = 3000;
